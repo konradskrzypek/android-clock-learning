@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -16,6 +17,11 @@ import static java.lang.Math.sqrt;
  * TODO: document your custom view class.
  */
 public class ClockView extends View {
+
+
+    public interface OnTimeChangeListener {
+        void onTimeChange(int hour, int minute, int nextHour);
+    }
 
     private boolean isInitialized = false;
     private Paint paint;
@@ -41,7 +47,18 @@ public class ClockView extends View {
 
     private int touchX;
     private int touchY;
-    private RadialPoint touchRadial;
+    private RadialPoint touchRadial = new RadialPoint(0, 0);
+    private static float hourTouchZoneCoeff = 0.4F;
+    private boolean is24HourMode = false;
+
+    private OnTimeChangeListener listener;
+
+    public void setListener(OnTimeChangeListener listener) {
+        this.listener = listener;
+    }
+    private int getMaxHour() {
+        return is24HourMode ? 24 : 12;
+    }
 
     public ClockView(Context context) {
         super(context);
@@ -60,11 +77,10 @@ public class ClockView extends View {
 
         if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE) {
             RadialPoint radial = toRadial(event.getX(), event.getY(), xMiddle, yMiddle);
-            touchRadial = radial;
             if (event.getAction() == MotionEvent.ACTION_DOWN ) {
                 if (radial.r < clockRadius) {
                     this.isTouched = true;
-                    this.wasTouchedInHourZone = radial.r < clockRadius/2;
+                    this.wasTouchedInHourZone = radial.r < clockRadius * hourTouchZoneCoeff;
                 } else {
                     this.isTouched = false;
                 }
@@ -73,7 +89,8 @@ public class ClockView extends View {
             if (event.getAction() == MotionEvent.ACTION_MOVE && (event.getHistorySize() > 0)) {
                 historicalRadial = toRadial(event.getHistoricalX(0), event.getHistoricalY(0), xMiddle, yMiddle);
             }
-            setTimeFromRadialPoint(radial, historicalRadial);
+            setTimeFromRadialPoint(radial, touchRadial);
+            touchRadial = radial;
         } else {
             this.isTouched = false;
         }
@@ -82,24 +99,47 @@ public class ClockView extends View {
     }
 
     private void setTimeFromRadialPoint(RadialPoint radial, RadialPoint historicalRadial) {
+        int newHour = hour;
+        int newMinute = minute;
         if (wasTouchedInHourZone) {
-            hour = (int)(radial.phi * 12 / TWOPI);
+            newHour = (int)((radial.phi + PI/24) * 12 / TWOPI);
         } else {
-            int newMinute = (int) (radial.phi * 60 / TWOPI);
+            newMinute = (int) (radial.phi * 60 / TWOPI);
+            int historicalRadialAngleQuarter;
             if (historicalRadial != null) {
-                int historicalRadialAngleQuarter = historicalRadial.getAngleQuarter();
-                int radialAngleQuarter = radial.getAngleQuarter();
-                int quarterDifference = historicalRadialAngleQuarter - radialAngleQuarter;
-                switch (quarterDifference) {
-                    case -3 : hour = (hour - 1) % 24;
-                        break;
-                    case 3 : hour = (hour + 1) % 24;
-                        break;
-                }
-
+                historicalRadialAngleQuarter = historicalRadial.getAngleQuarter();
+            } else {
+                historicalRadialAngleQuarter = minute / 15;
             }
-            minute = newMinute;
+
+            int radialAngleQuarter = radial.getAngleQuarter();
+            int quarterDifference = historicalRadialAngleQuarter - radialAngleQuarter;
+            switch (quarterDifference) {
+                case -3 : newHour = hour - 1;
+                    break;
+                case 3 : newHour = getNextHour();
+                    break;
+            }
         }
+        if (newHour == 0)
+            newHour = getMaxHour();
+
+        if (hour != newHour || minute != newMinute) {
+            minute = newMinute;
+            hour = newHour;
+            Log.d("AA", String.format("%1$f:%2$d|%3$f:%4$d", radial.phi, radial.getAngleQuarter(), historicalRadial.phi, historicalRadial.getAngleQuarter()));
+            Log.d("BB", String.format("%1$d:%2$d|%3$d", hour, minute, getNextHour()));
+            callListener();
+        }
+    }
+
+    private int getNextHour() {
+        return hour == getMaxHour() ? 1 : hour + 1;
+    }
+
+    private void callListener() {
+        if (listener != null)
+            listener.onTimeChange(hour, minute, getNextHour());
     }
 
     private void initClock() {
@@ -161,8 +201,8 @@ public class ClockView extends View {
 
         drawFace(canvas);
 
-        drawTouch(canvas);
-        drawNumbers(canvas);
+        ///drawTouch(canvas);
+        //drawNumbers(canvas);
         postInvalidateDelayed(500);
 
     }
@@ -195,7 +235,7 @@ public class ClockView extends View {
         canvas.drawCircle(xMiddle, yMiddle, clockRadius, paint);
 
         paint.setStyle(Paint.Style.FILL);
-        canvas.drawCircle(xMiddle, yMiddle, (float) middleRadius, paint);
+        canvas.drawCircle(xMiddle, yMiddle, middleRadius, paint);
 
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(1);
@@ -212,12 +252,17 @@ public class ClockView extends View {
         }
 
         // hands
-        double hourAngle = (TWOPI / 12 * (hour % 12)) + (TWOPI /(12*60) *(minute % 60));
-        double minuteAngle = TWOPI /(60) *(minute % 60);
+        double hourAngle = TWOPI / 12 * (hour % 12) + TWOPI /(12*60) *(minute % 60);
+        double minuteAngle = TWOPI /60 *(minute % 60);
         paint.setStrokeWidth(10);
         drawRadialLine(hourAngle, handStartRadius, hourHandRadius, paint, canvas);
         paint.setStrokeWidth(5);
         drawRadialLine(minuteAngle, handStartRadius, minuteHandRadius, paint, canvas);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setAlpha(10);
+        canvas.drawCircle(xMiddle, yMiddle, clockRadius * hourTouchZoneCoeff, paint);
+
     }
 
     private void drawRadialLine(double phi, double rStart, double rEnd, Paint paint, Canvas canvas) {
@@ -235,5 +280,10 @@ public class ClockView extends View {
         paint.setAntiAlias(true);
     }
 
+//    public void onMeasure(int widthSpec, int heightSpec) {
+//        super.onMeasure(widthSpec, heightSpec);
+//        int size = Math.min(getMeasuredWidth(), getMeasuredHeight());
+//        setMeasuredDimension(size, size);
+//    }
 
 }

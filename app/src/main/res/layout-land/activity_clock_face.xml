@@ -7,27 +7,26 @@
     tools:context="apr.kraznys.learnclock.ClockFaceActivity">
 
         <LinearLayout
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             >
 
                 <apr.kraznys.learnclock.ClockView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_alignParentTop="true"
                     android:layout_weight="1"
                     android:id="@+id/clock" />
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_weight="0.5"
-                    android:layout_height="0dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
                     android:background="@android:color/black"
+                    android:textColor="@android:color/white"
                     android:id="@+id/hourText"
-                    android:autoText="false"
-                    android:text="Hello"
-                    tools:textColor="@android:color/white"
-
+                    android:text="Hello!"
+                    android:textAlignment="center"
                     android:textSize="36sp" />
 
         </LinearLayout>
