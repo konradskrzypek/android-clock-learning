@@ -6,29 +6,57 @@
     android:layout_height="match_parent"
     tools:context="apr.kraznys.learnclock.ClockFaceActivity">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <apr.kraznys.learnclock.ClockView
+            android:id="@+id/clock"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            >
+            android:layout_alignParentTop="true"
+            android:layout_weight="1" />
 
-                <apr.kraznys.learnclock.ClockView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentTop="true"
-                    android:layout_weight="1"
-                    android:id="@+id/clock" />
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    android:background="@android:color/black"
-                    android:textColor="@android:color/white"
-                    android:id="@+id/hourText"
-                    android:text="Hello!"
-                    android:textAlignment="center"
-                    android:textSize="36sp" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/hourDigital"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@android:color/black"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/digital_hour"
+                tools:text="12:27" />
+
+            <TextView
+                android:id="@+id/hourText"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@android:color/black"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/text_hour"
+                tools:text="dwadzieścia siedem po dwunastej" />
+
+            <TextView
+                android:id="@+id/hourTextBefore"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@android:color/black"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/text_hour" />
         </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

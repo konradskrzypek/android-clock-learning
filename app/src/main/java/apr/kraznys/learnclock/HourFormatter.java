@@ -10,11 +10,11 @@ public class HourFormatter {
             "trzecia",
             "czwarta",
             "piąta",
-            "szosta",
-            "siodma",
+            "szósta",
+            "siódma",
             "ósma",
-            "dziewiata",
-            "dziesiata",
+            "dziewiąta",
+            "dziesiąta",
             "jedenasta",
             "dwunasta",
             "trzynasta",
@@ -34,11 +34,11 @@ public class HourFormatter {
             "trzeciej",
             "czwartej",
             "piątej",
-            "szostej",
-            "siodmej",
+            "szóstej",
+            "siódmej",
             "ósmej",
-            "dziewiatej",
-            "dziesiatej",
+            "dziewiątej",
+            "dziesiątej",
             "jedenastej",
             "dwunastej",
             "trzynastej",
@@ -50,11 +50,12 @@ public class HourFormatter {
             "dziewiętnastej",
             "dwudziestej",
             "dwudziestej pierwszej",
-            "dwudziestej drugej",
+            "dwudziestej drugiej",
             "dwudziestej trzeciej",
             "dwudziestej czwartej"}};
 
-    private static final String[] minuteNames = {"",
+    private static final String[] minuteNames = {
+            "",
             "dwie",
             "trzy",
             "cztery",
@@ -63,7 +64,7 @@ public class HourFormatter {
             "siedem",
             "osiem",
             "dziewięć",
-            "dziesięc",
+            "dziesięć",
             "jedynaście",
             "dwanaście",
             "trzynaście",
@@ -86,7 +87,6 @@ public class HourFormatter {
             "trzydzieści",
             "trzydzieści jeden",
             "trzydzieści dwie",
-            "trzydzieści Trzy",
             "trzydzieści trzy",
             "trzydzieści cztery",
             "trzydzieści pięć",
@@ -98,6 +98,7 @@ public class HourFormatter {
             "czterdzieści jeden",
             "czterdzieści dwie",
             "czterdzieści trzy",
+            "czterdzieści cztery",
             "czterdzieści pięć",
             "czterdzieści sześć",
             "czterdzieści siedem",
@@ -164,8 +165,12 @@ public class HourFormatter {
         if (minutes == 1)
             return minuteVariants[after ? 0 : 1];
         int mod10 = minutes % 10;
-        if (mod10 >2 && mod10<5)
+        if (minutes/10==1) {
+                return minuteVariants[2];
+        }
+        if (mod10 >1 && mod10<5) {
             return minuteVariants[3];
+        }
         return minuteVariants[2];
     }
 
